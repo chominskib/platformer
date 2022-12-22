@@ -6,8 +6,6 @@ Renderer::Renderer(sf::RenderWindow* w) : w(w){
 }
 
 void Renderer::draw(Entity* e){
-	std::cerr << "Sprite " << e->getSprite() << " will be drawn at " << e->getPos().x << " " << e->getPos().y << std::endl;
-
 	e->computeAnimation();
 
 	sf::Sprite s = *(e->getSprite());

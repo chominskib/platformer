@@ -48,6 +48,11 @@ struct Event{
 
 
 class Bookkeeper{
+    public:
+	enum status{
+		BEFORE, LVL1, FINISHED, ENDED
+	};
+    private:
 	struct cmp{ 
 		bool operator()(std::pair< sf::Time, Event* >, std::pair< sf::Time, Event* >);
 	};
@@ -56,8 +61,9 @@ class Bookkeeper{
 	                     std::vector< std::pair< sf::Time, Event* > >,
 		             cmp > pq;
 	Player* player;
+	status stage;
     public:
-	Bookkeeper(){}
+	Bookkeeper();
 
 	void execute(Event*);
 	void relax();
@@ -65,6 +71,8 @@ class Bookkeeper{
 	void add(Event*, sf::Time = sf::seconds(0.0f));
 	void setPlayer(Player*);
 	Entity* getPlayer();
+	status getStage();
+	void setStage(status);
 };
 
 class InputHandler{

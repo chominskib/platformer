@@ -3,7 +3,6 @@
 
 Game::Game(int w, int h) : w(w), h(h), inputhandler(), player(new Player(Point(100, 100))), renderer(&window){
 	global_bookkeeper.setPlayer(player);
-	std::cerr << "Created game" << std::endl;
 	window.create(sf::VideoMode(w, h), "Platformer");
 	renderer.setFrame(0, 640, 0, 480);
 }
@@ -28,7 +27,7 @@ void Game::loadLevel(){
 	movable_entities.insert(bb);
 	monsters.insert(bb);
 
-	EndOfLevel* e = new EndOfLevel(Point(600, 100));
+	EndOfLevel* e = new EndOfLevel(Point(1240, 100));
 	movable_entities.insert(e);
 	bonuses.insert(e);
 
@@ -41,23 +40,17 @@ void Game::loadLevel(){
 }
 
 void Game::run(){
-	std::cerr << "game:\tRun..." << std::endl;
-	stage = BEFORE;
-
-	while(stage != ENDED) loop();
-	std::cerr << "game:\tEnded" << std::endl;
+	while(global_bookkeeper.getStage() != Bookkeeper::ENDED) loop();
 	global_bookkeeper.clean();
 }
 
 void Game::loop(){
-	if(stage == BEFORE) menuloop();
-	if(stage == PLAYING) gameloop();
-	if(stage == FINISHED) endloop();
+	if(global_bookkeeper.getStage() == Bookkeeper::BEFORE) menuloop();
+	if(global_bookkeeper.getStage() == Bookkeeper::LVL1) gameloop();
+	if(global_bookkeeper.getStage() == Bookkeeper::FINISHED) endloop();
 }
 
 void Game::menuloop(){
-	std::cerr << "Menu loop:" << std::endl;
-	
 	sf::Clock clk;
 	clk.restart();
 
@@ -65,12 +58,11 @@ void Game::menuloop(){
 	while(window.pollEvent(event)){
 		if(event.type == sf::Event::Closed){
 			window.close();
-			stage = ENDED;
+			global_bookkeeper.setStage(Bookkeeper::FINISHED);
 		}
 		if(event.type == sf::Event::KeyPressed){
-			level = 1;
 			loadLevel();
-			stage = PLAYING;
+			global_bookkeeper.setStage(Bookkeeper::LVL1);
 		}
 	}
 
@@ -88,26 +80,21 @@ void Game::menuloop(){
 void Game::gameloop(){
 	sf::Clock clk;
 	clk.restart();
-	std::cerr << "game:\tGame loop:" << std::endl;
 	sf::Event event;
 	while(window.pollEvent(event)){
 		if(event.type == sf::Event::Closed){
 			window.close();
-			stage = ENDED;
+			global_bookkeeper.setStage(Bookkeeper::FINISHED);
 		}
 		if(event.type == sf::Event::Resized){
 			renderer.setFrame(0, event.size.width, 0, event.size.height);
 		}
-		std::cerr << "game:\tReceived event, passing to inputhandler" << std::endl;
 		inputhandler.update(event);
 	}
 
-	std::cerr << "game:\tRelaxing queue of events" << std::endl;
 	global_bookkeeper.relax();
-	std::cerr << "game:\tSending info from inputhandler to bookkeeper" << std::endl;
 	inputhandler.send();
 
-	std::cerr << "game:\tVerifying collisions: " << entities.size() << " entities and " << movable_entities.size() << " movable_entities" << std::endl;
 	double dt = physics_clock.getElapsedTime().asSeconds();
 	physics_clock.restart();
 
@@ -169,12 +156,26 @@ void Game::gameloop(){
 }
 
 void Game::endloop(){
-	//TODO
+	sf::Clock clk;
+	clk.restart();
 	sf::Event event;
 	while(window.pollEvent(event)){
 		if(event.type == sf::Event::Closed){
 			window.close();
-			stage = ENDED;
+			global_bookkeeper.setStage(Bookkeeper::FINISHED);
+		}
+		if(event.type == sf::Event::KeyPressed){
+			loadLevel();
+			global_bookkeeper.setStage(Bookkeeper::LVL1);
 		}
 	}
+
+	window.clear();
+	renderer.setFrame(0, w, 0, h);
+	renderer.drawText("See you again!", 72, Point(320, 400), sf::Color::White);
+	window.display();
+
+	//hold message for some time
+	while(clk.getElapsedTime().asSeconds() < 3.0f) sf:sleep(sf::microseconds(10));
+	exit(0);
 }

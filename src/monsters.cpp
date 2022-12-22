@@ -10,8 +10,7 @@ BadBall::BadBall(Point p) : Monster(p){
 }
 
 void BadBall::onCollisionWith(LivingEntity* le){
-	//TODO
-	//le->handleEvent(Event(Event::HPChange, -10.f));
+	le->handleEvent(new Event(Event::HPChange, -10.f));
 }
 
 void BadBall::AI(Point playerpos, double dt){

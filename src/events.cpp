@@ -33,24 +33,16 @@ void InputHandler::send(){
 	sf::Time t = clk.getElapsedTime();
 	clk.restart();
 	if(isLeftDown){
-		std::cerr << "ihdl:\tAttempting to send LeftDown with " << t.asSeconds() << std::endl;
 		global_bookkeeper.add(new Event(global_bookkeeper.getPlayer(), Event::MoveLeft, t));
-		std::cerr << "ihdl:\tSent LeftDown!" << std::endl;
 	}
 	if(isRightDown){
-		std::cerr << "ihdl:\tAttempting to send RightDown with " << t.asSeconds() << std::endl;
 		global_bookkeeper.add(new Event(global_bookkeeper.getPlayer(), Event::MoveRight, t));
-		std::cerr << "ihdl:\tSent RightDown!" << std::endl;
 	}
 	if(isUpDown){
-		std::cerr << "ihdl:\tAttempting to send UpDown with " << t.asSeconds() << std::endl;
 		global_bookkeeper.add(new Event(global_bookkeeper.getPlayer(), Event::MoveUp, t));
-		std::cerr << "ihdl:\tSent UpDown!" << std::endl;
 	}
 	if(isDownDown){
-		std::cerr << "ihdl:\tAttempting to send DownDown with " << t.asSeconds() << std::endl;
 		global_bookkeeper.add(new Event(global_bookkeeper.getPlayer(), Event::MoveDown, t));
-		std::cerr << "ihdl:\tSent DownDown!" << std::endl;
 	}
 
 }
@@ -79,24 +71,25 @@ double Event::getV(){
 	return value;
 }
 
+Bookkeeper::Bookkeeper(){
+	stage = BEFORE;
+}
+
 bool Bookkeeper::cmp::operator()(std::pair< sf::Time, Event* > a, std::pair< sf::Time, Event* > b){
 	return a.first > b.first;
 }
 
 void Bookkeeper::execute(Event* e){
 	if(e->target != nullptr){
-		std::cerr << "bkpr:\tExecuting as normal event" << std::endl;
 		e->execute();
 	}else{
-		if(e->type == Event::EOLHit) exit(0);
+		if(e->type == Event::EOLHit) setStage(Bookkeeper::FINISHED);
 	}
 }
 
 void Bookkeeper::relax(){
 	while(!pq.empty() && pq.top().first < clk.getElapsedTime()){
-		std::cerr << "bkpr:\tAttempting to execute event " << pq.top().second << std::endl;
 		execute(pq.top().second);
-		std::cerr << "bkpr:\tExecuted event " << pq.top().second << std::endl;
 		delete pq.top().second;
 		pq.pop();
 	}
@@ -107,16 +100,22 @@ void Bookkeeper::clean(){
 		delete pq.top().second;
 		pq.pop();
 	}
-	std::cerr << "bkpr:\tCleaned queue" << std::endl;
 }
 
 void Bookkeeper::add(Event* e, sf::Time t){
-	std::cerr << "bkpr:\tAdded event " << e << " with time " << t.asSeconds() << std::endl;
 	pq.push(std::make_pair(clk.getElapsedTime() + t, e));
 }
 
 void Bookkeeper::setPlayer(Player* p){
 	player = p;
+}
+
+Bookkeeper::status Bookkeeper::getStage(){
+	return stage;
+}
+
+void Bookkeeper::setStage(status s){
+	stage = s;
 }
 
 Entity* Bookkeeper::getPlayer(){

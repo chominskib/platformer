@@ -27,13 +27,6 @@ class Game{
 
 	int h, w;
 
-	enum status{
-		BEFORE, PLAYING, FINISHED, ENDED
-	};
-
-	status stage;
-	int level = -1;
-
 	void loadLevel();
 		
 	void menuloop();

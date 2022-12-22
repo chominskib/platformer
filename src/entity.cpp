@@ -31,8 +31,6 @@ Point MovableEntity::getV(){
 LivingEntity::LivingEntity(Point pos = Point(0, 0)) : MovableEntity(pos){}
 
 Player::Player(Point pos = Point(0, 0)) : LivingEntity(pos){
-	std::cerr << "Created player" << std::endl;
-
         animations = AnimationHandler({Animation("player.png"), Animation(0.1f, std::vector<std::string>({"player_left1.png", "player_left2.png"})), Animation(0.1f, std::vector<std::string>({"player_right1.png", "player_right2.png"})), Animation("player_left1.png"), Animation("player_right1.png")});
 
 	max_x_accell = 4000.f, terminal_speed = 1000.f, hp = 100.f, jump_height = 300.f, max_speed = 200;
@@ -44,7 +42,6 @@ Player::Player(Point pos = Point(0, 0)) : LivingEntity(pos){
 }
 
 void Player::handleEvent(Event* e){
-	std::cerr << "player:\tEvent received by player" << std::endl;
 	if(e->type == Event::MoveLeft) v.x -= max_x_accell * e->getTime() * (standing ? 1.0f : air_manouverability);
 	if(e->type == Event::MoveRight)v.x += max_x_accell * e->getTime() * (standing ? 1.0f : air_manouverability);
 	if(e->type == Event::MoveUp && standing){
@@ -71,8 +68,6 @@ void Player::computeAnimation(){
 }
 
 void MovableEntity::move(double dt, double max_height_of_obstacle, bool st, bool ceil){
-	std::cerr << "entt:\tEntity " << this << " moves by " << dt << " amount of time with mho " << max_height_of_obstacle << ", " << (st ? "" : "not ") << "standing" << std::endl;
-	
 	standing = st;
 	ceiling = ceil;
 
@@ -115,7 +110,4 @@ void MovableEntity::move(double dt, double max_height_of_obstacle, bool st, bool
 
 	if(energy_loss) v.x /= 2.0f;
 
-	std::cerr << "entt:\tEntity " << this << " pos: " << pos.x << " " << pos.y << std::endl;
-	std::cerr << "entt:\tEntity " << this << " vec: " << v.x << " " << v.y << std::endl;
-	std::cerr << "entt:\tEntity " << this << " energy: " << v.x*v.x + v.y*v.y << std::endl;
 }
